@@ -1,14 +1,18 @@
-# Module: shared_ca
+Module: shared_ca
+=================
+
 Module to aid in the creation of a shared CA Puppet Infrastructure
 
 
-## Goal or Use Case
+Goal or Use Case
+----------------
 Have a central CA/Console host on your network that any number of masters can submit inventory to (over REST). These masters should be able to sign their own agents, so agents don't need connectivity to the console host, amongst other potential reasons.
 
 Also, each master's ActiveMQ server should particpate in a shared broker mesh, including the console host, so orchestration can be done throughout the environment, including console live management.
 
 
-## Concepts
+Concepts
+--------
 In order to satisfy these goals, the CA living on the console host will be replicated out to each Puppet Master wishing to participate in the shared environment. Each of those masters CA (created by the PE installer script) will be replaced with the CA of the console host. The masters certficates (again, created at install) also need destroyed and re-signed by the shared CA.
 
 ActiveMQ and MCollective will participate in a similar fashion but Puppet and the pe_mcollective module will handle certificate management here. Because we want the broker mesh to be automatically managed by Puppet, we'll be using a slightly modified pe_mcollective module than what ships with PE. It includes code to manage the brokers, functionality intended for a future release.
@@ -16,10 +20,8 @@ ActiveMQ and MCollective will participate in a similar fashion but Puppet and th
 The shared_ca module aids in some of these tasks, mostly file copies & deletions.
 
 
-## Pre-Requisites
-
---building the shared_ca module--
---call out steps--
+Pre-Requisites
+--------------
 
 1. Install PE 2.5 onto a host with the master, agent & console roles selected (you'll get CA for free). Referred to as the Console host.
 
@@ -34,9 +36,11 @@ You'll also need to copy in the pe_mcollective module we provided you until a co
 c)  pe_mcollective -- Module that handles ActiveMQ & MCollective
 
 
-## Workflow -- add bit about inventory service, auth.conf
+Workflow -- add bit about inventory service, auth.conf
+------------------------------------------------------
 
-### Preparing the Shared CA
+Preparing the Shared CA
+-----------------------
 Once those prerequisites are met, you should run puppet apply against this module on each of your systems to prepare the hosts. For example, if you place this module into /root on your target systems during the bootstrap process:
 
 1. puppet apply --modulepath=/root:/opt/puppet/share/puppet/modules --certname=your_machines_certname --execute 'include shared_ca'
@@ -58,7 +62,8 @@ On a Master host, this declared class will:
   * Purge the Master host certificate/key pair that were created during install.
 
 
-### Bringing up the modified host
+Bringing up the Modified Host
+-----------------------------
 Once the module has done it's business, you have two paths to continue.
 
 
