@@ -28,13 +28,23 @@ $mco_credentials_file = '/etc/puppetlabs/mcollective/credentials'
 
        $files_to_purge = [ $ca_files_to_purge, $mco_files_to_purge, $old_function_to_purge ]
 
+       # Warning, running this class over and over again will reset the process
+       # that's kind of the point.
+       exec { 'purge_ca':
+         command => 'rm -rf /etc/puppetlabs/puppet/ssl/ca',
+         path    => '/opt/puppet/bin:/usr/kerberos/sbin:/usr/kerberos/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin',
+         before => File['copy_ca_dir'],
+       }
+
        file { 'copy_ca_dir':
           ensure  => directory,
           path    => '/etc/puppetlabs/puppet/ssl/ca',
           source  => $ca_folder_source,
           recurse => true,
+          force   => true,
           owner   => 'pe-puppet',
           group   => 'pe-puppet',
+          require => File[$files_to_purge]
        }
 
        file { 'copy_mco_credentials':
@@ -56,7 +66,9 @@ $mco_credentials_file = '/etc/puppetlabs/mcollective/credentials'
                     'pe-httpd',
                     'pe-mcollective',
                     'pe-activemq' ]:
-          ensure => 'stopped',
+          ensure  => 'stopped',
+          before  => File[$files_to_purge],
+          require => File['copy_custom_mco_module'],
         }
 
         file { $files_to_purge:
