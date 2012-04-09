@@ -14,8 +14,10 @@ class pe_shared_ca(
   $ca_folder_source       = "puppet:///modules/${module_name}/ca",
   $mco_credentials_source = "puppet:///modules/${module_name}/credentials",
   $mco_module_source      = "puppet:///modules/${module_name}/pe_mcollective",
-  $shared_ca_server='',
+  $shared_ca_server
 ) {
+
+  validate_bool($shared_ca_server)
 
   # Setup variables to represent various files this class will manipulate
   $ca_files_to_purge = [ '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
@@ -41,11 +43,15 @@ class pe_shared_ca(
 
 
 
-  if ! $shared_ca_server {
+  if $shared_ca_server {
+
+    $files_to_purge = [ $mco_files_to_purge, $old_function_to_purge ]
+
+  } else {
+
     $files_to_purge = [ $ca_files_to_purge,
                         $mco_files_to_purge,
                         $old_function_to_purge ]
-
 
     file { 'replace_ca_dir':
       ensure  => directory,
@@ -70,11 +76,6 @@ class pe_shared_ca(
 
   }
 
-  if $shared_ca_server {
-
-    $files_to_purge = [ $mco_files_to_purge, $old_function_to_purge ]
-
-  }
 
   service { 'shutdown_pe':
     name    => [ 'pe-puppet',
@@ -100,4 +101,5 @@ class pe_shared_ca(
     owner   => 'pe-puppet',
     group   => 'pe-puppet',
   }
+
 }
