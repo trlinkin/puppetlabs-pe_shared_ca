@@ -77,11 +77,10 @@ class pe_shared_ca(
   }
 
 
-  service { 'shutdown_pe':
-    name    => [ 'pe-puppet',
-                 'pe-httpd',
-                 'pe-mcollective',
-                 'pe-activemq' ],
+  service { [ 'pe-puppet',
+              'pe-httpd',
+              'pe-mcollective',
+              'pe-activemq' ]:
     ensure  => 'stopped',
     before  => File[$files_to_purge],
   }
