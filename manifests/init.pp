@@ -26,6 +26,8 @@ class pe_shared_ca(
                   "/etc/puppetlabs/puppet/ssl/public_keys/${::clientcert}.pem",
                   '/etc/puppetlabs/puppet/ssl/crl.pem', ]
 
+  # $ca_files_to_copy was added in preparation for issue #5
+  # for having the module gather CA information for the user
   $ca_files_to_copy = [ '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem',
                         '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
                         '/etc/puppetlabs/puppet/ssl/ca/ca_key.pem',
@@ -37,6 +39,9 @@ class pe_shared_ca(
                           '/etc/puppetlabs/activemq/broker.pem',
                           '/etc/puppetlabs/activemq/broker.ts', ]
 
+  # Puppet core ships a newer version of the create_resources function
+  # than what shipped in the pe_accounts module with PE
+  # Cody's pe_mcollective branch needs the newer function
   $old_function_to_purge = '/opt/puppet/share/puppet/modules/pe_accounts/lib/puppet/parser/functions/create_resources.rb'
 
   $mco_credentials_file = '/etc/puppetlabs/mcollective/credentials'
@@ -91,7 +96,9 @@ class pe_shared_ca(
     force   => true,
   }
 
-
+  # Assumes we're providing the customer with Cody's
+  # pe_mcollective branch that handles the automatic
+  # broker configuration
   file { 'copy_custom_mco_module':
     ensure  => directory,
     path    => '/etc/puppetlabs/puppet/modules/pe_mcollective',
