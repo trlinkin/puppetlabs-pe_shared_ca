@@ -36,10 +36,12 @@ Pre-Requisites
 
 5. If you want master hosts to send inventory data back to the shared CA (console) host, you'll need to modify `/etc/puppetlabs/puppet/auth.conf` on the shared CA host and add an entry for each master machine to the following section of that file.
 
-    path /facts
-    auth yes
-    method save
-    allow master.cert.name
+```
+path /facts
+auth yes
+method save
+allow master.cert.name
+```
 
 Usage
 =====
@@ -58,9 +60,11 @@ Once those prerequisites are met, you should run puppet apply against this modul
 
  * `is_ca_server.pp` contains the class declaration needed to prep your shared CA server.
 
-    class { 'pe_shared_ca':
-      shared_ca_server => true,
-    }
+```
+class { 'pe_shared_ca':
+  shared_ca_server => true,
+}
+```
 
 Declaring the `pe_shared_ca` class with `shared_ca_server => true` will:
 
