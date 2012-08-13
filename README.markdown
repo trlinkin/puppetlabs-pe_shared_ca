@@ -23,18 +23,14 @@ Pre-Requisites
 --------------
 
 1. Install PE 2.5 onto a host with the master, agent & console roles selected (you'll get CA for free). Referred to as the shared CA host.
-
-2. Install PE 2.5 on any number of hosts with just the master & agent roles (no console). Referred to as Master hosts.
-
-3. Populate some content for the `shared_ca` module.
+1. Install PE 2.5 on any number of hosts with just the master & agent roles (no console). Referred to as Master hosts.
+1. Populate some content for the `shared_ca` module.
   Copy the following data from the console host into this modules files directory:
- -  /etc/puppetlabs/puppet/ssl/ca -- CA Directory
- -  /etc/puppetlabs/mcollective/credentials -- MCollective Credentials
-
-4. You'll also need to use a modified `pe_mcollective` module until a compatible version makes it way into a PE 2.5.x release.
- -   `pe_mcollective` -- Module that handles ActiveMQ & MCollective
-
-5. If you want master hosts to send inventory data back to the shared CA (console) host, you'll need to modify `/etc/puppetlabs/puppet/auth.conf` on the shared CA host and add an entry for each master machine to the following section of that file.
+    -  /etc/puppetlabs/puppet/ssl/ca -- CA Directory
+    -  /etc/puppetlabs/mcollective/credentials -- MCollective Credentials
+1. You'll also need to use a modified `pe_mcollective` module until a compatible version makes it way into a PE 2.5.x release.
+    -   `pe_mcollective` -- Module that handles ActiveMQ & MCollective
+1. If you want master hosts to send inventory data back to the shared CA (console) host, you'll need to modify `/etc/puppetlabs/puppet/auth.conf` on the shared CA host and add an entry for each master machine to the following section of that file.
 
 ```
 path /facts
@@ -54,11 +50,9 @@ Preparing the Shared CA
 -----------------------
 Once those prerequisites are met, you should run puppet apply against this module on each of your systems to prepare the hosts. For example, if you place this module into /root on your target systems during the bootstrap process and are running on the CA host:
 
-1. `puppet apply --modulepath=/root:/opt/puppet/share/puppet/modules --certname=your_machines_certname /root/pe_shared_ca/usage/is_ca_server.pp`
-
- * `--modulepath` needs to include the directory where the stdlib module lives. The example includes the folder stdlib lives in PE 2.5.0. `--certname` is required if your installed certificate name differs from your hostname.
-
- * `is_ca_server.pp` contains the class declaration needed to prep your shared CA server.
+* `puppet apply --modulepath=/root:/opt/puppet/share/puppet/modules --certname=your_machines_certname /root/pe_shared_ca/usage/is_ca_server.pp`
+* `--modulepath` needs to include the directory where the stdlib module lives. The example includes the folder stdlib lives in PE 2.5.0. `--certname` is required if your installed certificate name differs from your hostname.
+* `is_ca_server.pp` contains the class declaration needed to prep your shared CA server.
 
 ```
 class { 'pe_shared_ca':
@@ -68,17 +62,17 @@ class { 'pe_shared_ca':
 
 Declaring the `pe_shared_ca` class with `shared_ca_server => true` will:
 
-  * Stop services: `pe-puppet`, `pe-httpd`, `pe-mcollective` & `pe-activemq`
-  * Copy the `pe_mcollective` module to `/etc/puppetlabs/puppet/modules`
-  * Purge MCollective Certificates
-  * Purge an old `create_resources` function that shipped with PE 2.5 by accident.
+* Stop services: `pe-puppet`, `pe-httpd`, `pe-mcollective` & `pe-activemq`
+* Copy the `pe_mcollective` module to `/etc/puppetlabs/puppet/modules`
+* Purge MCollective Certificates
+* Purge an old `create_resources` function that shipped with PE 2.5 by accident.
 
 Declaring the `pe_shared_ca` class with `shared_ca_server => false` will:
 
-  * Do the same as above, plus:
-  * Purge the hosts entire `$cadir` & replace it the CA folder you created during the pre-requisites.
-  * Replace `/etc/puppetlabs/mcollective/credentials` with one from your Console host
-  * Purge the Master host certificate/key pair that were created during install.
+* Do the same as above, plus:
+* Purge the hosts entire `$cadir` & replace it the CA folder you created during the pre-requisites.
+* Replace `/etc/puppetlabs/mcollective/credentials` with one from your Console host
+* Purge the Master host certificate/key pair that were created during install.
 
 
 Starting the Modified Host
@@ -86,28 +80,24 @@ Starting the Modified Host
 Once the module has done it's business, you have two paths to continue.
 
 
-A. On the shared CA host:
-
-1. Start the `pe-httpd` service.
-2. Run `puppet agent -t` which will now regenerate MCollective certificates and restart pe-mcollective and pe-activemq.
- - If you're not autosigning certificates, you will need to sign the MCollective certificate. `Exec[check_for_signed_broker_cert]` will fail on your first Puppet run, indicating that the certificate has not been signed.
- - `puppet cert --list & puppet cert --sign $certname.pe-internal-broker`
- - Run `puppet agent -t` again to finish the process.
-3. Optionally turn back on the pe-puppet service.
-
-
-B. On a Master Host:
-
-1. Start a Puppet Master manually, as it needs to generate and sign a new cert from your shared CA.
-  -  `puppet master --no-daemonize --debug`
-  -  Once that's done (you should see it startup successfully), you can control+C the process.
-2. Start the `pe-httpd` service.
-3. Run `puppet agent -t` which should now regenerate MCollective certificates and restart `pe-mcollective` and `pe-activemq`.
-  - If you're not autosigning certificates, you will need to sign the MCollective certificate. `Exec[check_for_signed_broker_cert]` will fail on your first Puppet run, indicating that the certificate has not been signed.
-  - `puppet cert --list & puppet cert --sign $certname.pe-internal-broker`
-  - Run `puppet agent -t` again to finish the process.
-ctive certificate. `puppet cert --list` & `puppet cert --sign` as appropriate.
-4. Optionally restart the `pe-puppet` service.
+1. On the shared CA host:
+    1. Start the `pe-httpd` service.
+    1. Run `puppet agent -t` which will now regenerate MCollective certificates and restart pe-mcollective and pe-activemq.
+        - If you're not autosigning certificates, you will need to sign the MCollective certificate. `Exec[check_for_signed_broker_cert]` will fail on your first Puppet run, indicating that the certificate has not been signed.
+        - `puppet cert --list & puppet cert --sign $certname.pe-internal-broker`
+        - Run `puppet agent -t` again to finish the process.
+    1. Optionally turn back on the pe-puppet service.
+1. On a Master Host:
+    1. Start a Puppet Master manually, as it needs to generate and sign a new cert from your shared CA.
+        -  `puppet master --no-daemonize --debug`
+        -  Once that's done (you should see it startup successfully), you can control+C the process.
+    1. Start the `pe-httpd` service.
+    1. Run `puppet agent -t` which should now regenerate MCollective certificates and restart `pe-mcollective` and `pe-activemq`.
+        - If you're not autosigning certificates, you will need to sign the MCollective certificate. `Exec[check_for_signed_broker_cert]` will fail on your first Puppet run, indicating that the certificate has not been signed.
+        - `puppet cert --list & puppet cert --sign $certname.pe-internal-broker`
+        - Run `puppet agent -t` again to finish the process.
+    ctive certificate. `puppet cert --list` & `puppet cert --sign` as appropriate.
+    1. Optionally restart the `pe-puppet` service.
 
 TO-DO: 
 
