@@ -12,6 +12,7 @@
 #
 class pe_shared_ca(
   $ca_folder_source       = "puppet:///modules/${module_name}/ca",
+  $internal_folder_source = "puppet:///modules/${module_name}/pe-internal",
   $mco_credentials_source = "puppet:///modules/${module_name}/credentials",
   $mco_module_source      = "puppet:///modules/${module_name}/pe_mcollective",
   $shared_ca_server
@@ -26,13 +27,20 @@ class pe_shared_ca(
     "/etc/puppetlabs/puppet/ssl/public_keys/${::clientcert}.pem",
     '/etc/puppetlabs/puppet/ssl/crl.pem',
   ]
-  # $ca_files_to_copy was added in preparation for issue #5
-  # for having the module gather CA information for the user
+  # $ca_files_to_copy was added to document which files needed to be maintained
+  # by this module on the non-shared_ca_server nodes
   $ca_files_to_copy = [
     '/etc/puppetlabs/puppet/ssl/ca/ca_crl.pem',
     '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
     '/etc/puppetlabs/puppet/ssl/ca/ca_key.pem',
     '/etc/puppetlabs/puppet/ssl/ca/ca_pub.pem',
+    '/etc/puppetlabs/puppet/ssl/certs/pe-internal-mcollective-servers.pem',
+    '/etc/puppetlabs/puppet/ssl/certs/pe-internal-peadmin-mcollective-client.pem',
+    '/etc/puppetlabs/puppet/ssl/private_keys/pe-internal-mcollective-servers.pem',
+    '/etc/puppetlabs/puppet/ssl/private_keys/pe-internal-peadmin-mcollective-client.pem',
+    '/etc/puppetlabs/puppet/ssl/public_keys/pe-internal-mcollective-servers.pem',
+    '/etc/puppetlabs/puppet/ssl/public_keys/pe-internal-peadmin-mcollective-client.pem',
+    '/etc/puppetlabs/puppet/ssl/public_keys/pe-internal-puppet-console-mcollective-client.pem',
   ]
   $mco_files_to_purge = [
     '/etc/puppetlabs/mcollective/ssl',
@@ -73,6 +81,30 @@ class pe_shared_ca(
       group  => 'pe-puppet',
       mode   => '0600',
       require => File[$files_to_purge],
+    }
+    file { 'replace_internal_certs':
+      ensure  => directory,
+      path    => '/etc/puppetlabs/puppet/ssl/certs',
+      source  => "${internal_folder_source}/private_keys",
+      recurse => true,
+      owner   => 'pe-puppet',
+      group   => 'pe-puppet',
+    }
+    file { 'replace_internal_private_keys':
+      ensure  => directory,
+      path    => '/etc/puppetlabs/puppet/ssl/private_keys',
+      source  => "${internal_folder_source}/private_keys",
+      recurse => true,
+      owner   => 'pe-puppet',
+      group   => 'pe-puppet',
+    }
+    file { 'replace_internal_public_keys':
+      ensure  => directory,
+      path    => '/etc/puppetlabs/puppet/ssl/public_keys',
+      source  => "${internal_folder_source}/private_keys",
+      recurse => true,
+      owner   => 'pe-puppet',
+      group   => 'pe-puppet',
     }
   }
   service { [
