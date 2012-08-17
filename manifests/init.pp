@@ -14,7 +14,6 @@ class pe_shared_ca(
   $ca_folder_source       = "puppet:///modules/${module_name}/ca",
   $internal_folder_source = "puppet:///modules/${module_name}/pe-internal",
   $mco_credentials_source = "puppet:///modules/${module_name}/credentials",
-  $mco_module_source      = "puppet:///modules/${module_name}/pe_mcollective",
   $shared_ca_server
 ) {
   validate_bool($shared_ca_server)
@@ -120,16 +119,5 @@ class pe_shared_ca(
     ensure  => absent,
     recurse => true,
     force   => true,
-  }
-  # Assumes we're providing the customer with Cody's
-  # pe_mcollective branch that handles the automatic
-  # broker configuration
-  file { 'copy_custom_mco_module':
-    ensure  => directory,
-    path    => '/etc/puppetlabs/puppet/modules/pe_mcollective',
-    source  => $mco_module_source,
-    recurse => true,
-    owner   => 'pe-puppet',
-    group   => 'pe-puppet',
   }
 }
