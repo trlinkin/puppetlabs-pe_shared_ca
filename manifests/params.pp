@@ -31,7 +31,6 @@ class pe_shared_ca::params {
     "/etc/puppetlabs/activemq/broker.pem",
     "/etc/puppetlabs/activemq/broker.ts",
   ]
-  $files_to_purge = [ $ca_files_to_purge, $mco_files_to_purge ]
 
   $puppet_user  = 'pe-puppet'
   $puppet_group = 'pe-puppet'

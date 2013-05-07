@@ -6,6 +6,7 @@
 #
 class pe_shared_ca (
   $ca_server,
+  $manage_puppet_conf  = true,
   $puppet_user         = $pe_shared_ca::params::puppet_user,
   $puppet_group        = $pe_shared_ca::params::puppet_group,
   $services            = $pe_shared_ca::params::services,
@@ -17,11 +18,16 @@ class pe_shared_ca (
   ## Stop services before purging cert files
   service { $services:
     ensure  => 'stopped',
-    before  => File[$files_to_purge],
+    before  => File[$mco_files_to_purge, $ca_files_to_purge],
   }
 
   ## Purge old ssl files
-  file { $files_to_purge:
+  file { $mco_files_to_purge:
+    ensure  => absent,
+    recurse => true,
+    force   => true,
+  }
+  file { $ca_files_to_purge:
     ensure  => absent,
     recurse => true,
     force   => true,
@@ -39,12 +45,28 @@ class pe_shared_ca (
       force   => true,
       require => File[$files_to_purge],
     }
+    if $manage_puppet_conf {
+      ini_setting { 'master ca setting':
+        path    => '/etc/puppetlabs/puppet/puppet.conf',
+        section => 'master',
+        setting => 'ca',
+        value   => 'true',
+      }
+    }
   } else {
     ## Remove CA directory from non-ca-server
     file { "${ssldir}/ca":
       ensure  => absent,
       recurse => true,
       force   => true,
+    }
+    if $manage_puppet_conf {
+      ini_setting { 'master ca setting':
+        path    => '/etc/puppetlabs/puppet/puppet.conf',
+        section => 'master',
+        setting => 'ca',
+        value   => 'false',
+      }
     }
   }
 
@@ -80,6 +102,6 @@ class pe_shared_ca (
     group  => $puppet_group,
     source => $mco_credentials_uri,
     mode   => '0600',
-    require => File[$files_to_purge],
+    require => File[$mco_files_to_purge, $ca_files_to_purge],
   }
 }
