@@ -36,10 +36,22 @@ class pe_shared_ca::params {
 
   $puppet_user  = 'pe-puppet'
   $puppet_group = 'pe-puppet'
-  $services     = [
-    'pe-puppet',
-    'pe-httpd',
-    'pe-mcollective',
-    'pe-activemq',
-  ]
+  case $::osfamily {
+    'debian': {
+      $services     = [
+        'pe-puppet-agent',
+        'pe-httpd',
+        'pe-mcollective',
+        'pe-activemq',
+      ]
+    }
+    'redhat': {
+      $services     = [
+        'pe-puppet',
+        'pe-httpd',
+        'pe-mcollective',
+        'pe-activemq',
+      ]
+    }
+  }
 }
