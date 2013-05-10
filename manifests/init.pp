@@ -35,7 +35,7 @@ class pe_shared_ca (
 
   if $ca_server {
     ## Update CA directory and remove all pre-existing files
-    file { "${ssldir}/ca":
+    file { "/etc/puppetlabs/puppet/ssl/ca":
       ensure  => directory,
       owner   => $puppet_user,
       group   => $puppet_group,
@@ -55,7 +55,7 @@ class pe_shared_ca (
     }
   } else {
     ## Remove CA directory from non-ca-server
-    file { "${ssldir}/ca":
+    file { "/etc/puppetlabs/puppet/ssl/ca":
       ensure  => absent,
       recurse => true,
       force   => true,
@@ -71,7 +71,7 @@ class pe_shared_ca (
   }
 
   ## Update pe-internal certs
-  file { "${ssldir}/certs":
+  file { "/etc/puppetlabs/puppet/ssl/certs":
     ensure  => directory,
     owner   => $puppet_user,
     group   => $puppet_group,
@@ -79,7 +79,7 @@ class pe_shared_ca (
     recurse => true,
   }
   ## Update pe-internal private_keys
-  file { "${ssldir}/private_keys":
+  file { "/etc/puppetlabs/puppet/ssl/private_keys":
     ensure  => directory,
     owner   => $puppet_user,
     group   => $puppet_group,
@@ -88,7 +88,7 @@ class pe_shared_ca (
     recurse => true,
   }
   ## Update pe-internal public_keys
-  file { "${ssldir}/public_keys":
+  file { "/etc/puppetlabs/puppet/ssl/public_keys":
     ensure  => directory,
     owner   => $puppet_user,
     group   => $puppet_group,

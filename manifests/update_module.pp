@@ -1,6 +1,4 @@
-class pe_shared_ca::update_module (
-  $ssldir = $settings::ssldir,
-) inherits pe_shared_ca::params {
+class pe_shared_ca::update_module inherits pe_shared_ca::params {
   $module_path = module_path($module_name)
 
   file { [
@@ -21,7 +19,7 @@ class pe_shared_ca::update_module (
   }
   #wrapper for ca files array
   pe_shared_ca::update_module::copy { $ca_files_to_copy:
-    sourcedir => $ssldir,
+    sourcedir => '/etc/puppetlabs/puppet/ssl',
     targetdir => "${module_path}/files/ssl",
   }
 }
