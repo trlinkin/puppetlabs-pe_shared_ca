@@ -6,6 +6,7 @@
 #
 class pe_shared_ca (
   $ca_server,
+  $purge_certs         = true,
   $manage_puppet_conf  = true,
   $puppet_user         = $pe_shared_ca::params::puppet_user,
   $puppet_group        = $pe_shared_ca::params::puppet_group,
@@ -21,16 +22,20 @@ class pe_shared_ca (
     before  => File[$mco_files_to_purge, $ca_files_to_purge],
   }
 
-  ## Purge old ssl files
-  file { $mco_files_to_purge:
-    ensure  => absent,
-    recurse => true,
-    force   => true,
-  }
-  file { $ca_files_to_purge:
-    ensure  => absent,
-    recurse => true,
-    force   => true,
+  if $purge_certs {
+    ## Purge old ssl files
+    file { $mco_files_to_purge:
+      ensure  => absent,
+      recurse => true,
+      force   => true,
+      before  => File['/etc/puppetlabs/mcollective/credentials'],
+    }
+    file { $ca_files_to_purge:
+      ensure  => absent,
+      recurse => true,
+      force   => true,
+      before  => File['/etc/puppetlabs/mcollective/credentials'],
+    }
   }
 
   if $ca_server {
@@ -102,6 +107,5 @@ class pe_shared_ca (
     group  => $puppet_group,
     source => $mco_credentials_uri,
     mode   => '0600',
-    require => File[$mco_files_to_purge, $ca_files_to_purge],
   }
 }
