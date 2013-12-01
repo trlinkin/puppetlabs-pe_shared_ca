@@ -22,11 +22,6 @@ class pe_shared_ca::params {
 
   # Setup variables to represent various files this class will manipulate
   $ca_files_to_purge = [
-    "/etc/puppetlabs/puppet/ssl/certs/ca.pem",
-    "/etc/puppetlabs/puppet/ssl/certs/${::clientcert}.pem",
-    "/etc/puppetlabs/puppet/ssl/private_keys/${::clientcert}.pem",
-    "/etc/puppetlabs/puppet/ssl/public_keys/${::clientcert}.pem",
-    "/etc/puppetlabs/puppet/ssl/crl.pem",
   ]
   $mco_files_to_purge = [
     "/etc/puppetlabs/mcollective/ssl",
